@@ -100,12 +100,14 @@ namespace LibriaMods.Shared
             weight = FadeSeconds > 0 ? 0f : 1f;
             FadeTo(1f);
             Log($"{preset.Name} on ({n} settings, {PipelineName}{(damage != null ? " + film damage" : "")})");
+            Toast.Show(preset.Name);
         }
 
         public static void Off()
         {
             if (Current == null) return;
             Log($"{Current.Name} off");
+            Toast.Show($"{Current.Name} off");
             Current = null;
             FadeTo(0f);
         }
@@ -137,6 +139,8 @@ namespace LibriaMods.Shared
         /// <summary>Call every frame (the LibriaMods loader does this for you).</summary>
         public static void Update()
         {
+            Toast.Tick();
+
             if (!Mathf.Approximately(weight, targetWeight))
                 weight = Mathf.MoveTowards(weight, targetWeight, fadeSpeed * Time.unscaledDeltaTime);
 
@@ -152,6 +156,7 @@ namespace LibriaMods.Shared
 
         public static void Shutdown()
         {
+            Toast.Destroy();
             damage?.Destroy();
             damage = null;
             backend?.Destroy();

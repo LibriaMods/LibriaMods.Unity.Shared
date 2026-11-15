@@ -89,6 +89,12 @@ Common effects – HDRP/URP: `ColorAdjustments`, `FilmGrain`, `Vignette`, `Split
 `WhiteBalance`, `Bloom`, `ChromaticAberration`, `Tonemapping`, `LiftGammaGain`.
 PPv2: `ColorGrading`, `Grain`, `Vignette`, `Bloom`, `ChromaticAberration`.
 
+## Toast – on-screen messages
+
+`Toast.Show("Speed: 1.6x")` shows a small message at the top of the screen that fades out after ~2 s
+(Unity UI through reflection, works in any game). Fx shows the preset name automatically when it changes;
+set `Toast.Enabled = false` to turn that off.
+
 ## Writing mods: `ILibriaMod` + the loader
 
 `LibriaMods.Loader` is the only MelonLoader mod. It loads every DLL in `UserData\LibriaMods\Mods`,
