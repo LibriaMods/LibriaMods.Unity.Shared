@@ -44,6 +44,25 @@ namespace LibriaMods.Shared
             UnityEngine.Object.DontDestroyOnLoad(go);
         }
 
+        /// <summary>
+        /// Throw away the previous volume and profile completely and start fresh. Swapping only the profile
+        /// isn't always picked up by the volume system, so every Apply gets a brand-new volume.
+        /// </summary>
+        protected void Recreate(string name, string effectsListField)
+        {
+            if (profile != null)
+            {
+                if (profile.GetType().GetField(effectsListField)?.GetValue(profile) is System.Collections.IEnumerable list)
+                    foreach (var e in list.Cast<object>().ToList())
+                        if (e is ScriptableObject so) UnityEngine.Object.DestroyImmediate(so);
+                if (profile is ScriptableObject p) UnityEngine.Object.DestroyImmediate(p);
+            }
+            if (go != null) UnityEngine.Object.DestroyImmediate(go);
+            go = null; volume = null; profile = null;
+            EnsureObject(name);
+            go.SetActive(false); // configure first, enable at the end of Apply so the volume registers with its profile
+        }
+
         // ------------------------------------------------------------------ helpers
 
         protected static Type FindType(string fullName)
@@ -151,16 +170,11 @@ namespace LibriaMods.Shared
 
         public override int Apply(Preset preset, Action<string> verbose)
         {
-            EnsureObject("LibriaMods FX Volume");
-            if (volume == null)
-            {
-                volume = go.AddComponent(volumeType);
-                volumeType.GetField("isGlobal").SetValue(volume, true);
-                volumeType.GetField("priority").SetValue(volume, 10000f); // above anything the game uses
-            }
+            Recreate("LibriaMods FX Volume", "components");
+            volume = go.AddComponent(volumeType);
+            volumeType.GetField("isGlobal").SetValue(volume, true);
+            volumeType.GetField("priority").SetValue(volume, 10000f); // above anything the game uses
 
-            // Fresh profile every time, so effects from the previous preset don't linger.
-            if (profile is ScriptableObject old) UnityEngine.Object.Destroy(old);
             profile = ScriptableObject.CreateInstance(profileType);
             volumeType.GetField("sharedProfile").SetValue(volume, profile);
 
@@ -174,6 +188,7 @@ namespace LibriaMods.Shared
                 foreach (var kv in fx.Values)
                     if (SetParam(comp, kv.Key, kv.Value, verbose)) count++;
             }
+            go.SetActive(true);
             return count;
         }
 
@@ -211,16 +226,12 @@ namespace LibriaMods.Shared
 
         public override int Apply(Preset preset, Action<string> verbose)
         {
-            EnsureObject("LibriaMods FX Volume");
-            if (volume == null)
-            {
-                volume = go.AddComponent(volumeType);
-                volumeType.GetField("isGlobal").SetValue(volume, true);
-                volumeType.GetField("priority").SetValue(volume, 10000f);
-            }
+            Recreate("LibriaMods FX Volume", "settings");
+            volume = go.AddComponent(volumeType);
+            volumeType.GetField("isGlobal").SetValue(volume, true);
+            volumeType.GetField("priority").SetValue(volume, 10000f);
             MatchCameraLayer(verbose);
 
-            if (profile is ScriptableObject old) UnityEngine.Object.Destroy(old);
             profile = ScriptableObject.CreateInstance(profileType);
             volumeType.GetField("sharedProfile").SetValue(volume, profile);
 
@@ -235,6 +246,7 @@ namespace LibriaMods.Shared
                 foreach (var kv in fx.Values)
                     if (SetParam(s, kv.Key, kv.Value, verbose)) count++;
             }
+            go.SetActive(true);
             return count;
         }
 
