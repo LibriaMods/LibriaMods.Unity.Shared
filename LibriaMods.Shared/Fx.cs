@@ -50,8 +50,9 @@ namespace LibriaMods.Shared
                     try
                     {
                         var p = Preset.Load(f);
-                        list.RemoveAll(x => x.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
-                        list.Add(p);
+                        // A custom preset with a built-in's name replaces it in place (keeps the cycling order).
+                        int i = list.FindIndex(x => x.Name.Equals(p.Name, StringComparison.OrdinalIgnoreCase));
+                        if (i >= 0) list[i] = p; else list.Add(p);
                     }
                     catch (Exception e) { Log($"Bad preset {Path.GetFileName(f)}: {e.Message}"); }
                 }
