@@ -1,0 +1,17 @@
+<Project>
+  <!-- Machine-specific game install folders live in ..\LibriaMods.user.props (next to the cloned repos,
+       not part of any repo). Each game mod has a default Steam path, so it's only needed for other locations. -->
+  <Import Project="$(MSBuildThisFileDirectory)..\LibriaMods.user.props" Condition="Exists('$(MSBuildThisFileDirectory)..\LibriaMods.user.props')" />
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+
+  <!-- Compile-time references only (never copied to output): Unity and MelonLoader from NuGet,
+       so a repo builds on any machine without a game installed. -->
+  <ItemGroup>
+    <PackageReference Include="UnityEngine.Modules" Version="2021.3.33" PrivateAssets="all" ExcludeAssets="runtime" />
+  </ItemGroup>
+</Project>
