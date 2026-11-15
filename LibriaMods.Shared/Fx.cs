@@ -33,8 +33,8 @@ namespace LibriaMods.Shared
 
         static Backend backend;
         static bool detectFailed;
-        static Preset pending;
-        static float targetWeight, fadeSpeed = float.PositiveInfinity;
+        static FilmDamage damage;
+        static float weight, targetWeight, fadeSpeed = float.PositiveInfinity;
 
         // ------------------------------------------------------------------ presets
 
@@ -76,13 +76,29 @@ namespace LibriaMods.Shared
         public static void Apply(Preset preset)
         {
             Current = preset;
-            if (!EnsureBackend()) { pending = preset; return; }
-            pending = null;
 
-            int n = backend.Apply(preset, Verbose);
-            backend.Weight = FadeSeconds > 0 ? 0f : 1f;
+            // Overlay effects handled by LibriaMods itself (any pipeline): [FilmDamage]
+            damage?.Destroy();
+            damage = null;
+            var dmg = preset.Effects.FirstOrDefault(e => e.Type.Equals("FilmDamage", StringComparison.OrdinalIgnoreCase));
+            if (dmg != null)
+            {
+                damage = new FilmDamage();
+                damage.Configure(dmg.Values, Verbose);
+            }
+
+            // Post-processing effects through the game's pipeline
+            int n = 0;
+            if (EnsureBackend())
+            {
+                var pipelineOnly = new Preset { Name = preset.Name, FilePath = preset.FilePath };
+                pipelineOnly.Effects.AddRange(preset.Effects.Where(e => e != dmg));
+                n = backend.Apply(pipelineOnly, Verbose);
+            }
+
+            weight = FadeSeconds > 0 ? 0f : 1f;
             FadeTo(1f);
-            Log($"{preset.Name} on ({n} settings, {backend.Name})");
+            Log($"{preset.Name} on ({n} settings, {PipelineName}{(damage != null ? " + film damage" : "")})");
         }
 
         public static void Off()
@@ -90,7 +106,6 @@ namespace LibriaMods.Shared
             if (Current == null) return;
             Log($"{Current.Name} off");
             Current = null;
-            pending = null;
             FadeTo(0f);
         }
 
@@ -118,19 +133,26 @@ namespace LibriaMods.Shared
             Apply(Current.FilePath != null && File.Exists(Current.FilePath) ? Preset.Load(Current.FilePath) : Current);
         }
 
-        /// <summary>Call every frame.</summary>
+        /// <summary>Call every frame (the LibriaMods loader does this for you).</summary>
         public static void Update()
         {
-            if (pending != null && EnsureBackend()) Apply(pending);
-            if (backend == null) return;
+            if (!Mathf.Approximately(weight, targetWeight))
+                weight = Mathf.MoveTowards(weight, targetWeight, fadeSpeed * Time.unscaledDeltaTime);
 
-            float w = backend.Weight;
-            if (Mathf.Approximately(w, targetWeight)) return;
-            backend.Weight = Mathf.MoveTowards(w, targetWeight, fadeSpeed * Time.unscaledDeltaTime);
+            if (backend != null) backend.Weight = weight;
+
+            if (damage != null)
+            {
+                damage.Opacity = weight;
+                if (Current == null && weight <= 0f) { damage.Destroy(); damage = null; }
+                else damage.Tick(Time.unscaledDeltaTime, Log);
+            }
         }
 
         public static void Shutdown()
         {
+            damage?.Destroy();
+            damage = null;
             backend?.Destroy();
             backend = null;
         }

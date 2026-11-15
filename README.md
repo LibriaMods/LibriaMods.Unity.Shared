@@ -28,7 +28,8 @@ Fx.Off();
 |---|---|
 | `Noir` | Black & white, extra contrast, light grain and vignette |
 | `Sepia` | Warm old photograph |
-| `Old Film` | Worn 1930s newsreel: heavy grain, strong vignette, slight colour fringing |
+| `Old Film` | Worn 1930s newsreel: heavy grain, vignette, light scratches, dust and flicker |
+| `Damaged Film` | Badly damaged print: all of the above plus tracking bands, rolls and burns |
 
 ### Custom presets
 
@@ -54,6 +55,35 @@ saturation = -100
 ```
 
 Effects/parameters the game's pipeline doesn't have are skipped, so one preset covers every pipeline.
+
+### Film damage overlay – `[FilmDamage]`
+
+Old-film damage that post-processing can't do, drawn by LibriaMods itself as a full-screen overlay
+between the 3D scene and the game's UI – so it works in **any** Unity game, whatever the pipeline:
+
+- moving **tracking bands** and occasional **rolls** sweeping the frame
+- wandering vertical **scratches**, **dust** specks and the odd **hair**
+- cigarette **burns** that bloom white-hot with a dark scorched rim, then fade
+- light **flicker** and occasional exposure **pops**
+
+It's procedural (no textures) and generated at a film-like frame rate, so it never repeats.
+
+```ini
+[FilmDamage]
+amount    = 1     ; master strength (all values: 0 = off, 1 = default, >1 = stronger)
+bands     = 1
+rolls     = 1
+scratches = 1
+dust      = 1
+hairs     = 1
+burns     = 1
+flicker   = 1
+pops      = 1
+fps       = 14    ; damage frame rate
+width     = 640   ; damage layer resolution (lower = softer and cheaper)
+sortingOrder = -100  ; overlay canvas order; raise it if it draws under something it shouldn't
+seed      = 0     ; 0 = random
+```
 
 Common effects – HDRP/URP: `ColorAdjustments`, `FilmGrain`, `Vignette`, `SplitToning`, `ChannelMixer`,
 `WhiteBalance`, `Bloom`, `ChromaticAberration`, `Tonemapping`, `LiftGammaGain`.
