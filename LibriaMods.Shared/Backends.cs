@@ -189,7 +189,21 @@ namespace LibriaMods.Shared
                     if (SetParam(comp, kv.Key, kv.Value, verbose)) count++;
             }
             go.SetActive(true);
+            ListVolumes(verbose);
             return count;
+        }
+
+        // Diagnostics (VerboseLog): every volume in the scene, so it's clear if a game volume competes with ours.
+        void ListVolumes(Action<string> verbose)
+        {
+            foreach (var v in UnityEngine.Object.FindObjectsOfType(volumeType))
+            {
+                var c = (Component)v;
+                var prof = volumeType.GetField("sharedProfile").GetValue(v);
+                var comps = prof?.GetType().GetField("components")?.GetValue(prof) as System.Collections.IEnumerable;
+                var names = comps == null ? "" : string.Join(",", comps.Cast<object>().Select(o => o.GetType().Name).ToArray());
+                verbose($"  volume '{c.name}' global={volumeType.GetField("isGlobal").GetValue(v)} priority={volumeType.GetField("priority").GetValue(v)} weight={volumeType.GetField("weight").GetValue(v)} layer={c.gameObject.layer} enabled={((Behaviour)c).isActiveAndEnabled} [{names}]");
+            }
         }
 
         public override float Weight

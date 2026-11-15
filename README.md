@@ -26,10 +26,17 @@ Fx.Off();
 
 | Preset | Look |
 |---|---|
-| `Noir` | Black & white, extra contrast, light grain and vignette |
-| `Sepia` | Warm old photograph |
-| `Old Film` | Worn 1930s newsreel: heavy grain, vignette, light scratches, dust and flicker |
-| `Damaged Film` | Badly damaged print: all of the above plus tracking bands, rolls and burns |
+| `Noir` | Black & white, punchy contrast, light grain and vignette |
+| `Noir Cold` | Black & white with the slightly blue tone of old film prints and CRT TVs |
+| `Sepia` | Warm old photograph (classic sepia colour matrix) |
+| `Old Film` | Noir plus a worn print: grain, vignette, light scratches, dust and flicker |
+| `Damaged Film` | Noir plus a badly damaged print: tracking bands, rolls, burns, scratches, dust |
+
+Tuned on a dark HDRP game (Syberia: The World Before) – for brighter games lower `postExposure` in a custom copy.
+
+**Tinted black & white:** HDRP applies saturation *after* tinting, so `saturation = -100` wipes out
+split toning or colour filters. Make the image monochrome with the `ChannelMixer` instead (see `Noir Cold`
+and `Sepia`): every output channel is a mix of the input channels, so the tint is part of the conversion.
 
 ### Custom presets
 
