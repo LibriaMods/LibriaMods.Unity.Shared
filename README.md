@@ -1,6 +1,7 @@
-# LibriaMods.Shared
+# LibriaMods.Unity.Shared
 
-Shared library for [LibriaMods](https://github.com/LibriaMods) mods.
+Shared library for [LibriaMods](https://github.com/LibriaMods) mods for **Unity** games (Mono, MelonLoader).
+Mods for other engines (e.g. Unreal) live in their own repos.
 
 ## Fx – post-processing presets for any Unity game
 
@@ -13,7 +14,7 @@ post-processing, so the UI and subtitles are left alone.
 - Presets supplied by the mod plus your own `.ini` files, smooth fade in/out
 
 ```csharp
-using LibriaMods.Shared;
+using LibriaMods.Unity.Shared;
 
 Fx.Log = msg => LoggerInstance.Msg(msg);   // optional
 Fx.Apply("Noir");                           // built-in or custom preset by name
@@ -127,12 +128,12 @@ set `Toast.Enabled = false` to turn that off.
 
 ## Writing mods: `ILibriaMod` + the loader
 
-`LibriaMods.Loader` is the only MelonLoader mod. It loads every DLL in `UserData\LibriaMods\Mods`,
+`LibriaMods.Unity.Loader` is the only MelonLoader mod. It loads every DLL in `UserData\LibriaMods\Mods`,
 creates the public classes that implement `ILibriaMod` and calls them every frame. Mods only reference
-`LibriaMods.Shared` and Unity – no MelonLoader – so the same mod could run under another loader later.
+`LibriaMods.Unity.Shared` and Unity – no MelonLoader – so the same mod could run under another loader later.
 
 ```csharp
-using LibriaMods.Shared;
+using LibriaMods.Unity.Shared;
 using UnityEngine;
 
 [LibriaMod("My Mod", "1.0.0")]
@@ -157,14 +158,14 @@ public class MyMod : LibriaMod
 ```
 
 **Hot reload:** DLLs are loaded from memory, so you can rebuild while the game runs. With
-`AutoReload = true` in `UserData\LibriaMods.Loader.cfg` a changed DLL is reloaded within a second;
-**F5** reloads everything. Changes to `LibriaMods.Shared` itself (the contract) need a game restart.
+`AutoReload = true` in `UserData\LibriaMods.Unity.Loader.cfg` a changed DLL is reloaded within a second;
+**F5** reloads everything. Changes to `LibriaMods.Unity.Shared` itself (the contract) need a game restart.
 
 Player install for any LibriaMods mod:
 
 ```
-Mods\LibriaMods.Loader.dll
-UserLibs\LibriaMods.Shared.dll
+Mods\LibriaMods.Unity.Loader.dll
+UserLibs\LibriaMods.Unity.Shared.dll
 UserData\LibriaMods\Mods\<the mod>.dll
 ```
 
@@ -175,4 +176,4 @@ Each mod's zip ships the loader and this library (see above).
 ## Building
 
 No game needed: Unity is referenced from the `UnityEngine.Modules` NuGet package. Open
-`LibriaMods.Shared.slnx` and build.
+`LibriaMods.Unity.Shared.slnx` and build.

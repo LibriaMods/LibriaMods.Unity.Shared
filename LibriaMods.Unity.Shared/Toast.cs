@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
     /// Small on-screen message (top centre, fades out), e.g. "Noir" or "Speed: 1.6x".

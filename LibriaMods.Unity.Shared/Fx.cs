@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
     /// Post-processing presets for any Unity (Mono) game: HDRP, URP or Post Processing Stack v2,

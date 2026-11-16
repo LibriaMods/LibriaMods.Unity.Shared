@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using LibriaMods.Shared;
+using LibriaMods.Unity.Shared;
 using MelonLoader;
 using MelonLoader.Utils;
 using UnityEngine;
 
-[assembly: MelonInfo(typeof(LibriaMods.Loader.Loader), "LibriaMods Loader", "1.0.0", "Ita")]
+[assembly: MelonInfo(typeof(LibriaMods.Unity.Loader.Loader), "LibriaMods Unity Loader", "1.1.1", "Ita")]
 [assembly: MelonGame(null, null)]
 
-namespace LibriaMods.Loader
+namespace LibriaMods.Unity.Loader
 {
     /// <summary>
     /// The only MelonMod of LibriaMods. Loads every DLL in UserData\LibriaMods\Mods, instantiates the classes
@@ -43,8 +43,8 @@ namespace LibriaMods.Loader
 
         public override void OnInitializeMelon()
         {
-            var cat = MelonPreferences.CreateCategory("LibriaModsLoader", "LibriaMods Loader");
-            cat.SetFilePath(Path.Combine(MelonEnvironment.UserDataDirectory, "LibriaMods.Loader.cfg"));
+            var cat = MelonPreferences.CreateCategory("LibriaModsUnityLoader", "LibriaMods Unity Loader");
+            cat.SetFilePath(Path.Combine(MelonEnvironment.UserDataDirectory, "LibriaMods.Unity.Loader.cfg"));
             modsFolder = cat.CreateEntry("ModsFolder", "", description: "Folder with LibriaMods DLLs. Empty = UserData\\LibriaMods\\Mods");
             autoReload = cat.CreateEntry("AutoReload", false, description: "Reload a mod automatically when its DLL changes (for mod development)");
             reloadKey  = cat.CreateEntry("ReloadKey", KeyCode.F5, description: "Reload all LibriaMods mods");

@@ -4,6 +4,6 @@
     <File Path="Directory.Build.props" />
     <File Path="README.md" />
   </Folder>
-  <Project Path="LibriaMods.Shared/LibriaMods.Shared.csproj" />
-  <Project Path="LibriaMods.Loader/LibriaMods.Loader.csproj" />
+  <Project Path="LibriaMods.Unity.Shared/LibriaMods.Unity.Shared.csproj" />
+  <Project Path="LibriaMods.Unity.Loader/LibriaMods.Unity.Loader.csproj" />
 </Solution>

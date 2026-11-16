@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
     /// A named set of post-processing overrides, grouped by effect (Unity component class name).

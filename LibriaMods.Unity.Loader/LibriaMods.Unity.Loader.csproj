@@ -1,12 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <!-- The MelonLoader entry point for every LibriaMods mod (goes to the game's Mods folder).
-       Game-agnostic: game mods install it together with LibriaMods.Shared. -->
+       Game-agnostic: game mods install it together with LibriaMods.Unity.Shared. -->
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.1.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LibriaMods.Shared\LibriaMods.Shared.csproj" Private="false" />
+    <ProjectReference Include="..\LibriaMods.Unity.Shared\LibriaMods.Unity.Shared.csproj" Private="false" />
     <PackageReference Include="LavaGang.MelonLoader" Version="0.7.3" PrivateAssets="all" ExcludeAssets="runtime" />
   </ItemGroup>
 </Project>

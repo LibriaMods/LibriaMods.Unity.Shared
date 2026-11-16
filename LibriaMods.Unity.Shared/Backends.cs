@@ -5,10 +5,10 @@ using System.Linq;
 using System.Reflection;
 using UnityEngine;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
-    /// Talks to the game's post-processing system purely through reflection, so LibriaMods.Shared has no
+    /// Talks to the game's post-processing system purely through reflection, so LibriaMods.Unity.Shared has no
     /// compile-time dependency on any render pipeline and loads in any Unity (Mono) game.
     /// </summary>
     internal abstract class Backend

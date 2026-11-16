@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
     /// Old TV / video screen drawn as a full-screen overlay above the 3D scene and below the game's UI:

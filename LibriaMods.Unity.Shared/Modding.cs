@@ -1,6 +1,6 @@
 using System;
 
-namespace LibriaMods.Shared
+namespace LibriaMods.Unity.Shared
 {
     /// <summary>
     /// A LibriaMods mod. Public, non-abstract classes implementing this (with a parameterless constructor)

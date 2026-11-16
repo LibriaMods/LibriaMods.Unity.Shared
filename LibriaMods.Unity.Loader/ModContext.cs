@@ -1,10 +1,10 @@
 using System.IO;
 using System.Linq;
-using LibriaMods.Shared;
+using LibriaMods.Unity.Shared;
 using MelonLoader;
 using MelonLoader.Utils;
 
-namespace LibriaMods.Loader
+namespace LibriaMods.Unity.Loader
 {
     /// <summary>MelonLoader-backed implementation of <see cref="IModContext"/>.</summary>
     internal sealed class ModContext : IModContext
