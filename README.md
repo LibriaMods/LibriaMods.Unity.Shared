@@ -4,13 +4,13 @@ Shared library for [LibriaMods](https://github.com/LibriaMods) mods.
 
 ## Fx – post-processing presets for any Unity game
 
-Switch the game's look (Noir, Sepia, Old Film or your own presets) through the game's **own**
+Switch the game's look (black & white, sepia, old film, VHS, CRT or your own presets) through the game's **own**
 post-processing, so the UI and subtitles are left alone.
 
 - Supports **HDRP**, **URP** and **Post Processing Stack v2**, detected at runtime via reflection
 - No reference to MelonLoader or any render pipeline: one DLL for any Unity **Mono** game and any mod loader
   (IL2CPP games are not supported)
-- Built-in presets plus your own `.ini` files, smooth fade in/out
+- Presets supplied by the mod plus your own `.ini` files, smooth fade in/out
 
 ```csharp
 using LibriaMods.Shared;
@@ -22,21 +22,28 @@ Fx.Off();
 // call Fx.Update() every frame (drives the fade)
 ```
 
-### Built-in presets
+### Presets come from the mod
 
-| Preset | Look |
-|---|---|
-| `Noir` | Black & white, punchy contrast, light grain and vignette |
-| `Noir Cold` | Black & white with the slightly blue tone of old film prints and CRT TVs |
-| `Sepia` | Warm old photograph (classic sepia colour matrix) |
-| `Old Film` | Noir plus a worn print: grain, vignette, light scratches, dust and flicker |
-| `Damaged Film` | Noir plus a badly damaged print: tracking bands, rolls, burns, scratches, dust |
+The library has no presets of its own: each mod adds its looks to `Fx.BuiltIn` in `OnLoad`
+(see [Syberia Noir](https://github.com/LibriaMods/LibriaMods.STWB.Noir) for a full set tuned on an HDRP game).
+Keeping them in the mod means the loader's hot reload picks up changes, and every game gets presets tuned for it.
 
-Tuned on a dark HDRP game (Syberia: The World Before) – for brighter games lower `postExposure` in a custom copy.
+```csharp
+public override void OnLoad(IModContext context)
+{
+    Fx.BuiltIn.Clear();
+    Fx.BuiltIn.Add(Preset.Parse(@"
+name = Noir
+[ColorAdjustments]
+saturation = -100
+contrast   = 28"));
+}
+public override void OnUnload() { Fx.Off(); Fx.BuiltIn.Clear(); }
+```
 
 **Tinted black & white:** HDRP applies saturation *after* tinting, so `saturation = -100` wipes out
 split toning or colour filters. Make the image monochrome with the `ChannelMixer` instead (see `Noir Cold`
-and `Sepia`): every output channel is a mix of the input channels, so the tint is part of the conversion.
+and `Sepia` in Syberia Noir): every output channel is a mix of the input channels, so the tint is part of the conversion.
 
 ### Custom presets
 
@@ -95,6 +102,22 @@ seed      = 0     ; 0 = random
 Common effects – HDRP/URP: `ColorAdjustments`, `FilmGrain`, `Vignette`, `SplitToning`, `ChannelMixer`,
 `WhiteBalance`, `Bloom`, `ChromaticAberration`, `Tonemapping`, `LiftGammaGain`.
 PPv2: `ColorGrading`, `Grain`, `Vignette`, `Bloom`, `ChromaticAberration`.
+
+### Old screen overlay – `[Screen]`
+
+Old TV / video look, drawn like `[FilmDamage]` as an overlay above the scene and below the UI:
+
+```ini
+[Screen]
+scanlines = 0.3   ; darkness of the scanlines (0..1)
+lines     = 360   ; lines over the screen height (rounded to whole pixels, so no moiré)
+mask      = 0     ; RGB aperture-grille stripes (0..1)
+maskSize  = 3     ; screen pixels per RGB triad
+roll      = 0     ; slow bright refresh bar (0..1)
+rollSpeed = 0.12  ; screen heights per second
+snow      = 0     ; video noise (0..1)
+bezel     = 0.25  ; rounded black corners of a curved tube (0..1)
+```
 
 ## Toast – on-screen messages
 

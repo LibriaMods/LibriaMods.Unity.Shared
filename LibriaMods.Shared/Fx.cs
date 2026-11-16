@@ -12,7 +12,8 @@ namespace LibriaMods.Shared
     ///
     /// Usage from a mod:
     ///   Fx.Log = msg => LoggerInstance.Msg(msg);   // optional
-    ///   Fx.Apply("Noir");                           // built-in (see <see cref="Presets"/>) or custom .ini
+    ///   Fx.BuiltIn.AddRange(myPresets);             // the mod's own presets (set again on every OnLoad)
+    ///   Fx.Apply("Noir");                           // a built-in or a custom .ini by name
     ///   ... and call Fx.Update() every frame (drives the fade).
     /// </summary>
     public static class Fx
@@ -27,6 +28,10 @@ namespace LibriaMods.Shared
         public static string CustomPresetsFolder =
             Path.Combine(Path.Combine(Path.GetDirectoryName(Application.dataPath), "UserData"), Path.Combine("LibriaMods", "Presets"));
 
+        /// <summary>Presets supplied by the mod (they live in the mod so hot reload picks up changes).
+        /// Clear and refill it in OnLoad; custom .ini files with the same name replace them.</summary>
+        public static readonly List<Preset> BuiltIn = new List<Preset>();
+
         public static Preset Current { get; private set; }
         public static bool IsOn => Current != null;
         public static string PipelineName => backend?.Name ?? "none";
@@ -34,6 +39,7 @@ namespace LibriaMods.Shared
         static Backend backend;
         static bool detectFailed;
         static FilmDamage damage;
+        static ScreenOverlay screen;
         static float weight, targetWeight, fadeSpeed = float.PositiveInfinity;
 
         // ------------------------------------------------------------------ presets
@@ -42,7 +48,7 @@ namespace LibriaMods.Shared
         /// a custom file with the same name overrides a built-in one).</summary>
         public static List<Preset> AllPresets()
         {
-            var list = new List<Preset>(Presets.BuiltIn);
+            var list = new List<Preset>(BuiltIn);
             if (Directory.Exists(CustomPresetsFolder))
             {
                 foreach (var f in Directory.GetFiles(CustomPresetsFolder, "*.ini").OrderBy(f => f, StringComparer.OrdinalIgnoreCase))
@@ -69,7 +75,7 @@ namespace LibriaMods.Shared
         public static bool Apply(string name)
         {
             var p = Find(name);
-            if (p == null) { Log($"Preset '{name}' not found (built-in: {string.Join(", ", Presets.BuiltIn.Select(x => x.Name).ToArray())})"); return false; }
+            if (p == null) { Log($"Preset '{name}' not found (built-in: {string.Join(", ", BuiltIn.Select(x => x.Name).ToArray())})"); return false; }
             Apply(p);
             return true;
         }
@@ -78,7 +84,7 @@ namespace LibriaMods.Shared
         {
             Current = preset;
 
-            // Overlay effects handled by LibriaMods itself (any pipeline): [FilmDamage]
+            // Overlay effects handled by LibriaMods itself (any pipeline): [FilmDamage] and [Screen]
             damage?.Destroy();
             damage = null;
             var dmg = preset.Effects.FirstOrDefault(e => e.Type.Equals("FilmDamage", StringComparison.OrdinalIgnoreCase));
@@ -88,18 +94,28 @@ namespace LibriaMods.Shared
                 damage.Configure(dmg.Values, Verbose);
             }
 
+            // [Screen]: scanlines, RGB mask, refresh bar, snow, CRT bezel
+            screen?.Destroy();
+            screen = null;
+            var scr = preset.Effects.FirstOrDefault(e => e.Type.Equals("Screen", StringComparison.OrdinalIgnoreCase));
+            if (scr != null)
+            {
+                screen = new ScreenOverlay();
+                screen.Configure(scr.Values, Verbose);
+            }
+
             // Post-processing effects through the game's pipeline
             int n = 0;
             if (EnsureBackend())
             {
                 var pipelineOnly = new Preset { Name = preset.Name, FilePath = preset.FilePath };
-                pipelineOnly.Effects.AddRange(preset.Effects.Where(e => e != dmg));
+                pipelineOnly.Effects.AddRange(preset.Effects.Where(e => e != dmg && e != scr));
                 n = backend.Apply(pipelineOnly, Verbose);
             }
 
             weight = FadeSeconds > 0 ? 0f : 1f;
             FadeTo(1f);
-            Log($"{preset.Name} on ({n} settings, {PipelineName}{(damage != null ? " + film damage" : "")})");
+            Log($"{preset.Name} on ({n} settings, {PipelineName}{(damage != null ? " + film damage" : "")}{(screen != null ? " + screen" : "")})");
             Toast.Show(preset.Name);
         }
 
@@ -129,11 +145,11 @@ namespace LibriaMods.Shared
             if (next == -1 || next >= all.Count) Off(); else Apply(all[next]);
         }
 
-        /// <summary>Re-read the current preset (if it came from a file) and apply it again.</summary>
+        /// <summary>Re-read the current preset (its .ini, or the built-in list) and apply it again.</summary>
         public static void Reload()
         {
             if (Current == null) return;
-            Apply(Current.FilePath != null && File.Exists(Current.FilePath) ? Preset.Load(Current.FilePath) : Current);
+            Apply(Current.FilePath != null && File.Exists(Current.FilePath) ? Preset.Load(Current.FilePath) : Find(Current.Name) ?? Current);
         }
 
         /// <summary>Call every frame (the LibriaMods loader does this for you).</summary>
@@ -152,6 +168,13 @@ namespace LibriaMods.Shared
                 if (Current == null && weight <= 0f) { damage.Destroy(); damage = null; }
                 else damage.Tick(Time.unscaledDeltaTime, Log);
             }
+
+            if (screen != null)
+            {
+                screen.Opacity = weight;
+                if (Current == null && weight <= 0f) { screen.Destroy(); screen = null; }
+                else screen.Tick(Time.unscaledDeltaTime, Log);
+            }
         }
 
         public static void Shutdown()
@@ -159,6 +182,8 @@ namespace LibriaMods.Shared
             Toast.Destroy();
             damage?.Destroy();
             damage = null;
+            screen?.Destroy();
+            screen = null;
             backend?.Destroy();
             backend = null;
         }
